@@ -7,23 +7,26 @@ import (
 	"strings"
 )
 
+type Direction int
+
 const (
-	Forward = iota
+	Forward Direction = iota
 	Up
 	Down
 )
 
-type Movement struct {
-	Direction int
-	Magnitude int
+type movement struct {
+	direction Direction
+	magnitude int
 }
 
-type Coordinates struct {
-	x int
-	y int
+type coordinates struct {
+	x   int
+	y   int
+	aim int
 }
 
-func readMovements(file string) []Movement {
+func readMovements(file string) []movement {
 	body, err := ioutil.ReadFile(file)
 	if err != nil {
 		fmt.Println(err)
@@ -31,49 +34,50 @@ func readMovements(file string) []Movement {
 
 	lines := strings.Split(string(body), "\n")
 
-	var movement *Movement
-	var movements []Movement
+	var move *movement
+	var moves []movement
 	var number int
 
 	for _, line := range lines {
-		movement = new(Movement)
+		move = new(movement)
 
 		fields := strings.Fields(line)
 		number, err = strconv.Atoi(string(fields[1]))
 		if err != nil {
 			fmt.Println(err)
 		}
-		movement.Magnitude = number
+		move.magnitude = number
 
 		switch fields[0] {
 		case "forward":
-			movement.Direction = Forward
+			move.direction = Forward
 		case "down":
-			movement.Direction = Down
+			move.direction = Down
 		case "up":
-			movement.Direction = Up
+			move.direction = Up
 		}
 
-		movements = append(movements, *movement)
+		moves = append(moves, *move)
 	}
 
-	return movements
+	return moves
 }
 
-func calculatePosition(movements []Movement) Coordinates {
-	var coordinates Coordinates
-	for _, movement := range movements {
-		switch movement.Direction {
-		case 0:
-			coordinates.x += movement.Magnitude
-		case 1:
-			coordinates.y -= movement.Magnitude
-		case 2:
-			coordinates.y += movement.Magnitude
+func calculatePosition(moves []movement) coordinates {
+	var coords coordinates
+	for _, move := range moves {
+		switch move.direction {
+		case Forward:
+			coords.x += move.magnitude
+			coords.y += coords.aim * move.magnitude
+		case Up:
+			coords.aim -= move.magnitude
+		case Down:
+			coords.aim += move.magnitude
 		}
 	}
 
-	return coordinates
+	return coords
 }
 
 func main() {
