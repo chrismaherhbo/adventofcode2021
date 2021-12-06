@@ -7,16 +7,8 @@ import (
 	"strings"
 )
 
-type Direction int
-
-const (
-	Forward Direction = iota
-	Up
-	Down
-)
-
 type movement struct {
-	direction Direction
+	direction string
 	magnitude int
 }
 
@@ -42,20 +34,13 @@ func readMovements(file string) []movement {
 		move = new(movement)
 
 		fields := strings.Fields(line)
+		move.direction = fields[0]
+
 		number, err = strconv.Atoi(string(fields[1]))
 		if err != nil {
 			fmt.Println(err)
 		}
 		move.magnitude = number
-
-		switch fields[0] {
-		case "forward":
-			move.direction = Forward
-		case "down":
-			move.direction = Down
-		case "up":
-			move.direction = Up
-		}
 
 		moves = append(moves, *move)
 	}
@@ -67,12 +52,12 @@ func calculatePosition(moves []movement) coordinates {
 	var coords coordinates
 	for _, move := range moves {
 		switch move.direction {
-		case Forward:
+		case "forward":
 			coords.x += move.magnitude
 			coords.y += coords.aim * move.magnitude
-		case Up:
+		case "up":
 			coords.aim -= move.magnitude
-		case Down:
+		case "down":
 			coords.aim += move.magnitude
 		}
 	}
